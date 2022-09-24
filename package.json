@@ -1,28 +1,16 @@
 {
-  "name": "websocket-echo-server",
-  "version": "1.0.0",
-  "private": true,
-  "description": "WebSocket echo server",
+  "name": "socket.io-chat",
+  "version": "0.0.0",
+  "description": "A simple chat client using socket.io",
   "main": "index.js",
-  "scripts": {
-    "lint": "eslint --ignore-path .gitignore . && prettier --check --ignore-path .gitignore \"**/*.{json,md,yaml,yml}\"",
-    "test": "nyc --reporter=lcov --reporter=text mocha test.js"
-  },
-  "author": "Luigi Pinca",
-  "license": "MIT",
+  "author": "Grant Timmerman",
+  "private": true,
+  "license": "BSD",
   "dependencies": {
-    "ws": "^8.4.0"
+    "express": "~4.17.1",
+    "socket.io": "^4.0.0"
   },
-  "devDependencies": {
-    "eslint": "^8.4.1",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-prettier": "^4.0.0",
-    "mocha": "^10.0.0",
-    "nyc": "^15.1.0",
-    "prettier": "^2.5.1"
-  },
-  "optionalDependencies": {
-    "bufferutil": "^4.0.5",
-    "utf-8-validate": "^5.0.7"
+  "scripts": {
+    "start": "node index.js"
   }
 }

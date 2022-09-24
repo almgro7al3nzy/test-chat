@@ -1,88 +1,148 @@
-'use strict';
+// Setup basic express server
+const express = require('express');
+const app = express();
+const path = require('path');
+const server = require('http').createServer(app);
 
-const http = require('http');
-const WebSocket = require('ws');
+const http = require('http').createServer(app);
+const io = require('socket.io')(server);
+const port = process.env.PORT || 3000;
 
-const server = http.createServer();
-
-server.on('request', function request(req, res) {
-  const body = http.STATUS_CODES[426];
-
-  res.writeHead(426, {
-    Connection: 'close',
-    'Content-Length': body.length,
-    'Content-Type': 'text/plain'
-  });
-
-  res.end(body);
+server.listen(port, () => {
+  console.log('Server listening at port %d', port);
 });
 
-const { env } = process;
-const highWaterMark = +env.HIGH_WATER_MARK || 16384;
+// التوجيه
+app.use(express.static(path.join(__dirname, 'public')));
 
-const wss = new WebSocket.Server({
-  maxPayload: +env.MAX_MESSAGE_SIZE || 64 * 1024,
-  server
-});
+// غرفة الدردشة
 
-wss.on('connection', function connection(ws) {
-  ws.isAlive = true;
-  ws.message = 0;
+let numUsers = 0;
 
-  ws.on('error', console.error);
-  ws.on('message', message);
-  ws.on('pong', heartbeat);
-});
+io.on('connection', (socket) => {
+	var addedUser = false;
+	console.log('connect');
 
-function message(data, binary) {
-  this.isAlive = true;
-  this.message++;
-  this.send(data, { binary }, (err) => {
-    /* istanbul ignore if */
-    if (err) {
-      return;
-    }
+	// عندما يرسل العميل "رسالة جديدة" ، فإن هذا يستمع وينفذ
+	socket.on('new message', (data) => {
+		//نطلب من العميل تنفيذ "رسالة جديدة"
+		socket.broadcast.emit('new message', {
+			username: socket.username,
+			message: data
+		});
+	});
 
-    if (--this.message === 0 && this.isPaused) {
-      this.resume();
-    }
+	// عندما يصدر العميل "إضافة مستخدم" ، فإن هذا يستمع وينفذ
+	socket.on('add user', (username) => {
+		if (addedUser) return;
+
+		// نقوم بتخزين اسم المستخدم في جلسة المقبس لهذا العميل
+		socket.username = username;
+		++numUsers;
+		addedUser = true;
+		socket.emit('login', {
+			numUsers: numUsers
+		});
+		// صدى عالميًا (جميع العملاء) قام الشخص بالاتصال به
+		socket.broadcast.emit('user joined', {
+			username: socket.username,
+			numUsers: numUsers
+		});
+	});
+
+	// عندما يرسل العميل "كتابة" ، نقوم ببثها للآخرين
+	socket.on('typing', () => {
+		socket.broadcast.emit('typing', {
+			username: socket.username
+		});
+	});
+
+	// عندما يرسل العميل عبارة "توقف عن الكتابة" ، نقوم ببثها للآخرين
+	socket.on('stop typing', () => {
+		socket.broadcast.emit('stop typing', {
+			username: socket.username
+		});
+	});
+
+	//عندما يقطع المستخدم .. تنفيذ هذا
+	socket.on('disconnect', () => {
+		if (addedUser) {
+			--numUsers;
+
+			// صدى عالميًا أن هذا العميل قد غادر
+			socket.broadcast.emit('user left', {
+				username: socket.username,
+				numUsers: numUsers
+			});
+		}
+	});
+
+	socket.on('fromClient', () => {
+		socket.broadcast.emit('fromClient', {
+			username: socket.username
+		});
+		console.log('from client');
+
+	});
+
+	socket.on('clientMessage', () => {
+		socket.broadcast.emit('clientMessage',{
+		});
+		console.log('connect');
+	});
+
+
+  // عندما يرسل العميل "رسالة جديدة" ، فإن هذا يستمع وينفذ
+  socket.on('new message', (data) => {
+    // نطلب من العميل تنفيذ "رسالة جديدة"
+    socket.broadcast.emit('new message', {
+      username: socket.username,
+      message: data
+    });
   });
 
-  if (this.bufferedAmount >= highWaterMark && !this.isPaused) {
-    this.pause();
+  // عندما يصدر العميل "إضافة مستخدم" ، فإن هذا يستمع وينفذ
+  socket.on('add user', (username) => {
+    if (addedUser) return;
 
-    // This is used only for testing.
-    this.emit('pause');
-  }
-}
-
-function heartbeat() {
-  this.isAlive = true;
-}
-
-setInterval(function interval() {
-  for (const ws of wss.clients) {
-    if (ws.isAlive === false) {
-      ws.terminate();
-      continue;
-    }
-
-    ws.isAlive = false;
-    ws.ping();
-  }
-}, +env.HEARTBEAT_INTERVAL || 30000).unref();
-
-if (require.main === module) {
-  server.on('listening', function listening() {
-    const { address, family, port } = server.address();
-    console.log(
-      'Server listening on %s:%d',
-      family === 'IPv6' ? `[${address}]` : address,
-      port
-    );
+    // نقوم بتخزين اسم المستخدم في جلسة المقبس لهذا العميل
+    socket.username = username;
+    ++numUsers;
+    addedUser = true;
+    socket.emit('login', {
+      numUsers: numUsers
+    });
+    //صدى عالميًا (جميع العملاء) قام الشخص بالاتصال به
+    socket.broadcast.emit('user joined', {
+      username: socket.username,
+      numUsers: numUsers
+    });
   });
 
-  server.listen(+env.BIND_PORT || 1337, env.BIND_ADDRESS || '::');
-}
+  // عندما يرسل العميل "كتابة" ، نقوم ببثها للآخرين
+  socket.on('typing', () => {
+    socket.broadcast.emit('typing', {
+      username: socket.username
+    });
+  });
 
-module.exports = { server, wss };
+  // عندما يرسل العميل عبارة "توقف عن الكتابة" ، نقوم ببثها للآخرين
+  socket.on('stop typing', () => {
+    socket.broadcast.emit('stop typing', {
+      username: socket.username
+    });
+  });
+
+  // عندما يقطع المستخدم .. تنفيذ هذا
+  socket.on('disconnect', () => {
+    if (addedUser) {
+      --numUsers;
+
+      // صدى عالميًا أن هذا العميل قد غادر
+      socket.broadcast.emit('user left', {
+        username: socket.username,
+        numUsers: numUsers
+      });
+    }
+  });
+});
