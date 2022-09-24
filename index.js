@@ -15,6 +15,8 @@ server.listen(port, () => {
 // التوجيه
 app.use(express.static(path.join(__dirname, 'public')));
 
+    socket.emit('message', formatMessage("WebCage", 'Messages are limited to this room! '));
+
 // غرفة الدردشة
 
 let numUsers = 0;
