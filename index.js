@@ -1,4 +1,4 @@
-// Setup basic express server
+// إعداد خادم أساسي سريع
 const express = require('express');
 const app = express();
 const path = require('path');

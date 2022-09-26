@@ -7,18 +7,20 @@ $(function() {
     '#3b88eb', '#3824aa', '#a700ff', '#d300e7'
   ];
 
-  // Initialize variables
+// تهيئة المتغيرات
   const $window = $(window);
-  const $usernameInput = $('.usernameInput'); // Input for username
-  const $messages = $('.messages');           // Messages area
-  const $inputMessage = $('.inputMessage');   // Input message input box
+  const $usernameInput = $('.usernameInput'); // إدخال لاسم المستخدم
+  const $messages = $('.messages');           // منطقة الرسائل
+  const $inputMessage = $('.inputMessage');   // مربع إدخال رسالة الإدخال
+  
+  const userList = document.getElementById('users'); // قائمة المستخدم
 
-  const $loginPage = $('.login.page');        // The login page
-  const $chatPage = $('.chat.page');          // The chatroom page
+  const $loginPage = $('.login.page');        //صفحة تسجيل الدخول
+  const $chatPage = $('.chat.page');          // صفحة غرفة الدردشة
 
   const socket = io();
 
-  // Prompt for setting a username
+// المطالبة بتعيين اسم مستخدم
   let username;
   let connected = false;
   let typing = false;
@@ -35,45 +37,45 @@ $(function() {
     log(message);
   }
 
-  // Sets the client's username
+  //يعيّن اسم المستخدم الخاص بالعميل
   const setUsername = () => {
     username = cleanInput($usernameInput.val().trim());
 
-    // If the username is valid
+    // إذا كان اسم المستخدم صالحًا
     if (username) {
       $loginPage.fadeOut();
       $chatPage.show();
       $loginPage.off('click');
       $currentInput = $inputMessage.focus();
 
-      // Tell the server your username
+      // أخبر الخادم باسم المستخدم الخاص بك
       socket.emit('add user', username);
     }
   }
 
-  // Sends a chat message
+  // يرسل رسالة دردشة
   const sendMessage = () => {
     let message = $inputMessage.val();
-    // Prevent markup from being injected into the message
+    //منع حقن المكياج في الرسالة
     message = cleanInput(message);
-    // if there is a non-empty message and a socket connection
+    // إذا كانت هناك رسالة غير فارغة ووصلة مقبس
     if (message && connected) {
       $inputMessage.val('');
       addChatMessage({ username, message });
-      // tell server to execute 'new message' and send along one parameter
+      //اطلب من الخادم تنفيذ "رسالة جديدة" وإرسال معلمة واحدة
       socket.emit('new message', message);
     }
   }
 
-  // Log a message
+  // سجل رسالة
   const log = (message, options) => {
     const $el = $('<li>').addClass('log').text(message);
     addMessageElement($el, options);
   }
 
-  // Adds the visual chat message to the message list
+  //يضيف رسالة الدردشة المرئية إلى قائمة الرسائل
   const addChatMessage = (data, options = {}) => {
-    // Don't fade the message in if there is an 'X was typing'
+    // لا تتلاشى الرسالة إذا كان هناك "X كان يكتب"
     const $typingMessages = getTypingMessages(data);
     if ($typingMessages.length !== 0) {
       options.fade = false;
@@ -95,28 +97,27 @@ $(function() {
     addMessageElement($messageDiv, options);
   }
 
-  // Adds the visual chat typing message
+  //يضيف رسالة كتابة الدردشة المرئية
   const addChatTyping = (data) => {
     data.typing = true;
     data.message = 'is typing';
     addChatMessage(data);
   }
 
-  // Removes the visual chat typing message
+// يزيل رسالة كتابة الدردشة المرئية
   const removeChatTyping = (data) => {
     getTypingMessages(data).fadeOut(function () {
       $(this).remove();
     });
   }
-
-  // Adds a message element to the messages and scrolls to the bottom
-  // el - The element to add as a message
-  // options.fade - If the element should fade-in (default = true)
-  // options.prepend - If the element should prepend
-  //   all other messages (default = false)
+// يضيف عنصر رسالة إلى الرسائل وينتقل إلى أسفل
+  // el - العنصر المراد إضافته كرسالة
+  // options.fade - إذا كان العنصر يجب أن يتلاشى (افتراضي = صحيح)
+  // options.prepend - إذا كان يجب أن يكون العنصر مقدمًا
+  // كل الرسائل الأخرى (افتراضي = خطأ)
   const addMessageElement = (el, options) => {
     const $el = $(el);
-    // Setup default options
+    // إعداد الخيارات الافتراضية
     if (!options) {
       options = {};
     }
@@ -127,7 +128,7 @@ $(function() {
       options.prepend = false;
     }
 
-    // Apply options
+    //تطبيق الخيارات
     if (options.fade) {
       $el.hide().fadeIn(FADE_TIME);
     }
@@ -140,12 +141,12 @@ $(function() {
     $messages[0].scrollTop = $messages[0].scrollHeight;
   }
 
-  // Prevents input from having injected markup
+  //يمنع الإدخال من الترميز المحقون
   const cleanInput = (input) => {
     return $('<div/>').text(input).html();
   }
 
-  // Updates the typing event
+  //يحدّث حدث الكتابة
   const updateTyping = () => {
     if (connected) {
       if (!typing) {
@@ -165,33 +166,33 @@ $(function() {
     }
   }
 
-  // Gets the 'X is typing' messages of a user
+// يحصل على "X يكتب" رسائل المستخدم
   const getTypingMessages = (data) => {
     return $('.typing.message').filter(function (i) {
       return $(this).data('username') === data.username;
     });
   }
 
-  // Gets the color of a username through our hash function
+// يحصل على لون اسم المستخدم من خلال دالة التجزئة الخاصة بنا
   const getUsernameColor = (username) => {
-    // Compute hash code
+    // حساب كود التجزئة
     let hash = 7;
     for (let i = 0; i < username.length; i++) {
       hash = username.charCodeAt(i) + (hash << 5) - hash;
     }
-    // Calculate color
+    // احسب اللون
     const index = Math.abs(hash % COLORS.length);
     return COLORS[index];
   }
 
-  // Keyboard events
+  // أحداث لوحة المفاتيح
 
   $window.keydown(event => {
-    // Auto-focus the current input when a key is typed
+    // التركيز التلقائي على الإدخال الحالي عند كتابة مفتاح
     if (!(event.ctrlKey || event.metaKey || event.altKey)) {
       $currentInput.focus();
     }
-    // When the client hits ENTER on their keyboard
+    // عندما يقوم العميل بالضغط على ENTER على لوحة المفاتيح الخاصة به
     if (event.which === 13) {
       if (username) {
         sendMessage();
@@ -207,72 +208,72 @@ $(function() {
     updateTyping();
   });
 
-  // Click events
+// انقر فوق الأحداث
 
-  // Focus input when clicking anywhere on login page
+  // التركيز على الإدخال عند النقر في أي مكان على صفحة تسجيل الدخول
   $loginPage.click(() => {
     $currentInput.focus();
   });
 
-  // Focus input when clicking on the message input's border
+// التركيز على الإدخال عند النقر فوق حد إدخال الرسالة
   $inputMessage.click(() => {
     $inputMessage.focus();
   });
 
-  // Socket events
+// أحداث المقبس
 
-  // Whenever the server emits 'login', log the login message
+  // عندما يرسل الخادم "تسجيل دخول" ، سجّل رسالة تسجيل الدخول
   socket.on('login', (data) => {
     connected = true;
     // Display the welcome message
-    const message = 'Welcome to Socket.IO Chat – ';
+    const message = 'مرحبًا بك في Socket.IO Chat -';
     log(message, {
       prepend: true
     });
     addParticipantsMessage(data);
   });
 
-  // Whenever the server emits 'new message', update the chat body
+// عندما يرسل الخادم "رسالة جديدة" ، قم بتحديث نص المحادثة
   socket.on('new message', (data) => {
     addChatMessage(data);
   });
 
-  // Whenever the server emits 'user joined', log it in the chat body
+// عندما يرسل الخادم "انضمام المستخدم" ، قم بتسجيله في نص المحادثة
   socket.on('user joined', (data) => {
     log(`${data.username} joined`);
     addParticipantsMessage(data);
   });
 
-  // Whenever the server emits 'user left', log it in the chat body
+// عندما يرسل الخادم "المستخدم غادر" ، قم بتسجيله في نص المحادثة
   socket.on('user left', (data) => {
     log(`${data.username} left`);
     addParticipantsMessage(data);
     removeChatTyping(data);
   });
 
-  // Whenever the server emits 'typing', show the typing message
+// عندما يرسل الخادم "كتابة" ، اعرض رسالة الكتابة
   socket.on('typing', (data) => {
     addChatTyping(data);
   });
 
-  // Whenever the server emits 'stop typing', kill the typing message
+// عندما يرسل الخادم "توقف عن الكتابة" ، اقتل رسالة الكتابة
   socket.on('stop typing', (data) => {
     removeChatTyping(data);
   });
 
   socket.on('disconnect', () => {
-    log('you have been disconnected');
+    log('لقد تم قطع الاتصال');
   });
 
   socket.io.on('reconnect', () => {
-    log('you have been reconnected');
+    log('لقد تم إعادة الاتصال');
     if (username) {
       socket.emit('add user', username);
     }
   });
 
   socket.io.on('reconnect_error', () => {
-    log('attempt to reconnect has failed');
+    log('فشلت محاولة إعادة الاتصال');
   });
 
 });
