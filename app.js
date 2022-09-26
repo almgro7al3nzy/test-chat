@@ -1,11 +1,3 @@
-/**
- * @author Joyce Hong
- * @email soja0524@gmail.com
- * @create date 2019-09-02 20:51:10
- * @modify date 2019-09-02 20:51:10
- * @desc socket.io server !
- */
-
 const express = require('express');
 const bodyParser = require('body-parser');
 
@@ -32,7 +24,7 @@ var server = app.listen(3000,()=>{
 })
 
 
-//Chat Server
+//خادم الدردشة
 
 var io = socketio.listen(server)
 
@@ -84,7 +76,7 @@ io.on('connection',function(socket) {
         const roomName = messageData.roomName
 
         console.log(`[Room Number ${roomName}] ${userName} : ${messageContent}`)
-        // Just pass the data that has been passed from the writer socket
+        //فقط قم بتمرير البيانات التي تم تمريرها من مأخذ توصيل الكاتب
 
         const chatData = {
             userName : userName,
@@ -94,12 +86,12 @@ io.on('connection',function(socket) {
         socket.broadcast.to(`${roomName}`).emit('updateChat',JSON.stringify(chatData)) // Need to be parsed into Kotlin object in Kotlin
     })
 
-    // socket.on('typing',function(roomNumber){ //Only roomNumber is needed here
+    // socket.on('typing',function(roomNumber){ //مطلوب فقط رقم الغرفة هنا
     //     console.log('typing triggered')
     //     socket.broadcast.to(`${roomNumber}`).emit('typing')
     // })
 
-    // socket.on('stopTyping',function(roomNumber){ //Only roomNumber is needed here
+    // socket.on('stopTyping',function(roomNumber){ //مطلوب فقط رقم الغرفة هنا
     //     console.log('stopTyping triggered')
     //     socket.broadcast.to(`${roomNumber}`).emit('stopTyping')
     // })
@@ -109,4 +101,4 @@ io.on('connection',function(socket) {
     });
 })
 
-module.exports = server; //Exporting for test
+module.exports = server; //التصدير للاختبار
