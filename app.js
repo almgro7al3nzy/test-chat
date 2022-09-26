@@ -83,7 +83,7 @@ io.on('connection',function(socket) {
             messageContent : messageContent,
             roomName : roomName
         }
-        socket.broadcast.to(`${roomName}`).emit('updateChat',JSON.stringify(chatData)) // Need to be parsed into Kotlin object in Kotlin
+        socket.broadcast.to(`${roomName}`).emit('updateChat',JSON.stringify(chatData)) //يلزم تحليلها في كائن Kotlin في Kotlin
     })
 
     // socket.on('typing',function(roomNumber){ //مطلوب فقط رقم الغرفة هنا
