@@ -1,37 +1,15 @@
 {
-  "name": "social-backend",
+  "name": "module6group",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "main": "chatServer.js",
   "scripts": {
-    "dev": "env-cmd -f ./.env nodemon index.js",
-    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/QuocNguyen99/Social-backend.git"
   },
   "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/QuocNguyen99/Social-backend/issues"
-  },
-  "homepage": "https://github.com/QuocNguyen99/Social-backend#readme",
+  "description": "",
   "dependencies": {
-    "bcrypt": "^5.0.0",
-    "cloudinary": "^1.23.0",
-    "dotenv": "^8.2.0",
-    "express": "^4.17.1",
-    "joi": "^17.3.0",
-    "joi-objectid": "^3.0.1",
-    "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.10.13",
-    "nodemon": "^2.0.6",
-    "react-native": "^0.63.3",
-    "socket.io": "^3.0.3"
-  },
-  "devDependencies": {
-    "env-cmd": "^10.1.0"
+    "mime": "~2.4.6",
+    "socket.io": "^1.0.6"
   }
 }
