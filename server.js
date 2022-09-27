@@ -176,11 +176,6 @@ io.on('connection', (socket) => {
   
   
   
-     // when the client emits 'add user', this listens and executes
-    socket.on('add user', (username) => {
-        if (addedUser) return;
-
-
    // when the client emits 'new message', this listens and executes
     socket.on('new message', (data) => {
         // we tell the client to execute 'new message'
