@@ -196,7 +196,6 @@ io.on('connection', (socket) => {
         });
     });
 
-
     // when the client emits 'typing', we broadcast it to others
       socket.on('typing', () => {
         socket.broadcast.emit('typing', {
