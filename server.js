@@ -21,42 +21,42 @@ server.listen(port, () => {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Map to keep track of server that have connected
-// Initially everyone will be a in this map
+// خريطة لتتبع الخادم المتصل
+// في البداية سيكون الجميع في هذه الخريطة
 const servantsMap = new Map();
 
-// To keep track of who the admin is when the service starts
+//لتتبع من هو المسؤول عند بدء الخدمةs
 let admin = null;
 
 let sessionStarted = false;
 
-// User connects to the socket.io
+// يتصل المستخدم بمنفذ socket.io
 io.on('connection', (socket) => {
   socket.on('login', (data) =>{
     if(!sessionStarted){
       addUser(socket.id, data.username, data.battery, 
         data.latitude, data.longitude, (err, response) => {
           if(err){
-            socket.emit('login results', {results: false});   // User not able to login
+            socket.emit('login results', {results: false});   // المستخدم غير قادر على تسجيل الدخول
           }else if(!response){ 
-            // User won't be admin by defaul when added to the Map, unless is the first one
-            // So let's check if he/she should be the new admin 
+             // لن يكون المستخدم مسؤولاً بشكل افتراضي عند إضافته إلى الخريطة ، ما لم يكن هو الأول
+            // لذا دعنا نتحقق مما إذا كان يجب أن يكون المسؤول الجديد
             newAdmin(socket.id, data.battery, (newAdmin, response) => {  
               if(newAdmin){   
-                // It's been confirmed that the new user should be the new admin, so update the Map and user's
+                // تم التأكيد على أن المستخدم الجديد يجب أن يكون المسؤول الجديد ، لذا قم بتحديث الخريطة والمستخدم
                 updateAdmin(socket.id, () => {
-                  // Let other know about new user, who is the admin
+                  // دع الآخرين يعرفون عن المستخدم الجديد ، وهو المسؤول
                   socket.broadcast.emit('userAdded', ({ ...data, admin: true}));        
                 });              
               }else{
-                // The admin has not changed
+                // لم يتغير المشرف
                 socket.broadcast.emit('userAdded', ({...data, admin: false}));
               }
             });
             socket.emit('login results', {results: true});
             servantsMap.set(socket.id, socket);
           }else{
-            // If it's the first user to login, then it will definetely be assigned the admin role
+            // إذا كان هو أول مستخدم يقوم بتسجيل الدخول ، فسيتم تحديد دور المسؤول له
             socket.broadcast.emit('userAdded', ({...data, admin: true}));
             socket.emit('login results', {results: true});
             servantsMap.set(socket.id, socket);
@@ -77,9 +77,9 @@ io.on('connection', (socket) => {
     updateBattery(socket.id, battery, () => {     
       newAdmin(socket.id, battery, (newAdmin, response) => {
         if(newAdmin){   
-          // It's been confirmed that there should be a new admin, update the map
+          // تم التأكيد على أنه يجب أن يكون هناك مسؤول جديد ، قم بتحديث الخريطة
           updateAdmin(response.id, () => {
-              // Let other users know that the user whose batter changed is now the admin
+// دع المستخدمين الآخرين يعرفون أن المستخدم الذي تغيرت بطاريته هو المسؤول الآن
               getUsername(response.id, (err, response) => {
                 if(!err){
                   console.log('Update admin');
@@ -105,7 +105,7 @@ io.on('connection', (socket) => {
     });    
   });
 
-  // Once the master is done writing the matrices
+  //بمجرد أن ينتهي المعلم من كتابة المصفوفات
   socket.on('start master', () => {
     admin = socket;
     filterServants(socket.id, (response)=> {
@@ -158,8 +158,8 @@ io.on('connection', (socket) => {
         }
       }
     }else{
-      // Master does not distribute matrices among the servants
-      // Sends entire matrices to each servant, for testing purposes
+       // السيد لا يوزع المصفوفات بين الخدم
+      // يرسل مصفوفات كاملة لكل خادم لأغراض الاختبار
       var matricesInfo = {
         firstColumns: secondRows,
         secondColumns: secondColumns,
@@ -174,8 +174,8 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Servants sent back their results from matrix multiplication
-  // Give results to the master
+// أرسل الخدم نتائجهم من مضاعفة المصفوفة
+  // أعط النتائج للسيد
   socket.on('multiplication result', (data) => {
     admin.emit('partial results', (data));
   });

@@ -2,7 +2,7 @@ const { response } = require("express");
 
 const usersMap = new Map();
 
-// Function used to keep track of users who have joined the server
+//تستخدم الوظيفة لتتبع المستخدمين الذين انضموا إلى الخادم
 function addUser(id, username, battery, latitude, longitude, callback){
     newName(username, (response) => {
        if(!response){
@@ -22,7 +22,7 @@ function addUser(id, username, battery, latitude, longitude, callback){
     });
 }
 
-// Check if a name is new in the Map
+//تحقق مما إذا كان الاسم جديدًا في الخريطة
 function newName(name, callback){
     for(let [, user] of usersMap){
         if (name === user.username){
@@ -33,7 +33,7 @@ function newName(name, callback){
 }
 
 
-// Find user in the Map 
+// ابحث عن المستخدم في الخريطة 
 function getUsername(id, callback){
     if(usersMap.has(id)){
         return callback(false, usersMap.get(id).username);
@@ -42,7 +42,7 @@ function getUsername(id, callback){
     }
 }
 
-// Check if there should be a new admin based on battery level
+//تحقق مما إذا كان يجب أن يكون هناك مسؤول جديد بناءً على مستوى البطارية
 function newAdmin(id, battery, callback){    
     getAdminBattery((response) =>{
         if(response.id === id){
@@ -61,7 +61,7 @@ function newAdmin(id, battery, callback){
     });     
 }
 
-// Get max battery in the Map
+//احصل على أقصى طاقة للبطارية في الخريطة
 function getMaxBattery(callback){
     var maxBattery = 0;
     var maxUserId = 0;
@@ -74,7 +74,7 @@ function getMaxBattery(callback){
     return callback({id: maxUserId, battery: maxBattery});
 }
 
-// Get user with max battery, it should be the admin 
+//احصل على مستخدم بأقصى طاقة للبطارية ، يجب أن يكون المسؤول
 function getAdminBattery(callback){
     var adminBattery = 0;
     var adminUser = 0;
@@ -87,7 +87,7 @@ function getAdminBattery(callback){
     return callback({id: adminUser, battery: adminBattery})
 }
 
-// Update who is the admin
+//تحديث من هو المسؤول
 function updateAdmin(newAdminId, callback){
     for(let [key, user] of usersMap){
         user.admin = (key === newAdminId) ? true: false;
@@ -95,7 +95,7 @@ function updateAdmin(newAdminId, callback){
     return callback();
 }
 
-// Update the battery for a user
+// تحديث البطارية للمستخدم
 function updateBattery(id, battery, callback){
     for(let [key, user] of usersMap){
         if(key === id){
@@ -105,7 +105,7 @@ function updateBattery(id, battery, callback){
     return callback();
 }
 
-// Get all users that are currently in the server
+// احصل على جميع المستخدمين الموجودين حاليًا في الخادم
 function getAllUsers(callback){
     const usersArray = [];
     for(let [, user] of usersMap){
@@ -114,8 +114,8 @@ function getAllUsers(callback){
     return callback(usersArray);
 }
 
-// Get the users who will server as servants
-// They must be within one km of the admin and with at least 20% of battery
+// احصل على المستخدمين الذين سيخدمون كخدم
+// يجب أن تكون في نطاق كيلومتر واحد من المسؤول وبطارية لا تقل عن 20٪
 function filterServants(admin_id, callback){
     const uselessServants = [];
     getAdminLocation((err, response) => {
@@ -137,7 +137,7 @@ function filterServants(admin_id, callback){
     return callback(uselessServants);
 }
 
-// Get the location (latitude and longitude) of the admin user
+// احصل على الموقع (خطوط الطول والعرض) للمستخدم الإداري
 function getAdminLocation(callback){
     for(let [, user] of usersMap){
         if(user.admin){
@@ -147,7 +147,7 @@ function getAdminLocation(callback){
     return callback(true, null);
 }
 
-// Check if a user is within range of the admin (1 km)
+تحقق مما إذا كان المستخدم في نطاق المشرف (كيلومتر واحد)
 function userWithinRange(admin_lat, admin_long, serv_lat, serv_long, callback){
     const earthRadius = 6371;
     const distLat = toRadians(admin_lat-serv_lat);     // In radians
@@ -164,12 +164,12 @@ function userWithinRange(admin_lat, admin_long, serv_lat, serv_long, callback){
     }
 }
 
-// Convert a degree to radians
+// تحويل درجة إلى راديان
 function toRadians(degrees){
     return degrees * (Math.PI/180);
 }
 
-// Get number of remaining servants
+// احصل على عدد الخدم المتبقين
 function getNumServant(){
     return usersMap.size;
 }
