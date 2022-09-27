@@ -60,7 +60,7 @@ io.on('connection',function(socket) {
         // TODO: تحتاج إلى الاختيار
         //io.to: يمكن للمستخدم الذي انضم الحصول على حدث ؛
         //socket.broadcast.to: ستتلقى الرسالة جميع المستخدمين باستثناء المستخدم الذي انضم
-        // socket.broadcast.to (`$ {roomNumber}`) .emit ('newUserToChatRoom'، userName)؛
+         socket.broadcast.to (`$ {roomNumber}`) .emit ('newUserToChatRoom'، userName)؛
         io.to(`${roomNumber}`).emit('newUserToChatRoom',userName);
 
     })
