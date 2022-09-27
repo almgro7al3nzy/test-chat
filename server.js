@@ -173,17 +173,7 @@ io.on('connection', (socket) => {
       }
     }
   });
-
-// أرسل الخدم نتائجهم من مضاعفة المصفوفة
-  // أعط النتائج للسيد
-  socket.on('multiplication result', (data) => {
-    admin.emit('partial results', (data));
-  });
-
-  // TODO: disconnect
-});
-
-    // when the client emits 'new message', this listens and executes
+   // when the client emits 'new message', this listens and executes
     socket.on('new message', (data) => {
         // we tell the client to execute 'new message'
         socket.broadcast.emit('new message', {
@@ -196,15 +186,7 @@ io.on('connection', (socket) => {
     // when the client emits 'add user', this listens and executes
     socket.on('add user', (username) => {
         if (addedUser) return;
-
-        // we store the username in the socket session for this client
-        socket.username = username;
-        ++numUsers;
-        addedUser = true;
-        socket.emit('login', {
-          numUsers: numUsers
-        });
-        // echo globally (all clients) that a person has connected
+       // echo globally (all clients) that a person has connected
         socket.broadcast.emit('user joined', {
           username: socket.username,
           numUsers: numUsers
@@ -225,20 +207,12 @@ io.on('connection', (socket) => {
         });
       });
 
-    socket.on('disconnect', function () {
-        if (addedUser){
-            --numUsers;
 
-            // echo globally that this client has left
-            socket.broadcast.emit('user left', {
-                username: socket.username,
-                numUsers: numUsers
-            });
-        }
-    });
-});
+// أرسل الخدم نتائجهم من مضاعفة المصفوفة
+  // أعط النتائج للسيد
+  socket.on('multiplication result', (data) => {
+    admin.emit('partial results', (data));
+  });
 
-server.listen(app.get('port'), function(){
-    console.log("Server is now running...");
-    console.log("Port is on", app.get('port'))
+  // TODO: disconnect
 });
