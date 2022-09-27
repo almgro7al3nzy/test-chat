@@ -18,9 +18,6 @@ const { addUser,
 server.listen(port, () => {
   console.log(`Server listening at port ${port}`);
 });
-// views is directory for all template files
-app.set('views', __dirname + '/views');
-app.set('view engine', 'ejs');
 
 app.use(express.static(path.join(__dirname, 'public')));
 
