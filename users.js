@@ -147,7 +147,7 @@ function getAdminLocation(callback){
     return callback(true, null);
 }
 
-تحقق مما إذا كان المستخدم في نطاق المشرف (كيلومتر واحد)
+//تحقق مما إذا كان المستخدم في نطاق المشرف (كيلومتر واحد)
 function userWithinRange(admin_lat, admin_long, serv_lat, serv_long, callback){
     const earthRadius = 6371;
     const distLat = toRadians(admin_lat-serv_lat);     // In radians
